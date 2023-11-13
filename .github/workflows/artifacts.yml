@@ -4,8 +4,15 @@ on:
     branches:
       - main
   workflow_dispatch:
+env:
+  MONGO_DB_NAME: gha-demo
 jobs:
   test:
+    env:
+      MONGODB_CLUSTER_ADDRESS: cluster0.15pwqcc.mongodb.net # sample data
+      MONGODB_USERNAME: maximilian # sample data
+      MONGODB_PASSWORD: X34Mqtpg10D8RGTi # sample data
+      PORT: 8080 # sample data
     runs-on: ubuntu-latest
     steps:
       - name: Get code
@@ -19,6 +26,9 @@ jobs:
         run: npm ci
       - name: Lint code
         run: npm run lint
+      - name: Output information
+        run: |
+          echo "MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}"
       # - name: Test code
       #  run: npm run test
   build:
@@ -62,5 +72,9 @@ jobs:
         run: ls
       - name: Output filename
         run: echo "${{ needs.build.outputs.script-file }}"
+      - name: Output information
+        run: |
+          echo "MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}" # this part has no output because its dont have access in test
+          echo "MONGODB_DB_NAME: $MONGODB_DB_NAME"
       - name: Deploy
         run: echo "Deploying..."
