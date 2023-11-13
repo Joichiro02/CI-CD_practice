@@ -5,13 +5,13 @@ on:
       - main
   workflow_dispatch:
 env:
-  MONGODB_DB_NAME: gha-demo
+  MONGODB_DB_NAME: gha-demo # sample data, its not a good practice to put here the important info
 jobs:
   test:
     env:
-      MONGODB_CLUSTER_ADDRESS: cluster0.15pwqcc.mongodb.net # sample data
-      MONGODB_USERNAME: maximilian # sample data
-      MONGODB_PASSWORD: X34Mqtpg10D8RGTi # sample data
+      MONGODB_CLUSTER_ADDRESS: cluster0.15pwqcc.mongodb.net # sample data, its not a good practice to put here the important info
+      MONGODB_USERNAME: maximilian # sample data, its not a good practice to put here the important info
+      MONGODB_PASSWORD: X34Mqtpg10D8RGTi # sample data, its not a good practice to put here the important info
       PORT: 8080 # sample data
     runs-on: ubuntu-latest
     steps:
