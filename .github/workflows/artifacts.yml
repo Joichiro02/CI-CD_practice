@@ -1,8 +1,8 @@
 name: Deploy Website with artifacts
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 env:
   MONGODB_DB_NAME: gha-demo # sample data, its not a good practice to put here the important info
