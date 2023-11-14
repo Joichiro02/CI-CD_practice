@@ -8,6 +8,7 @@ env:
   MONGODB_DB_NAME: gha-demo # sample data, its not a good practice to put here the important info
 jobs:
   test:
+    environment: testing # testing is the name of the environment in github, if the environment have the same data in secrets the environment will be priority
     env:
       MONGODB_CLUSTER_ADDRESS: cluster0.15pwqcc.mongodb.net # sample data, its not a good practice to put here the important info
       # MONGODB_USERNAME: maximilian # sample data, its not a good practice to put here the important info
