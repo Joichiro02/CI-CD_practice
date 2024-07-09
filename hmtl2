@@ -1,0 +1,136 @@
+Yes, you can use the custom paginator with a `mat-table`. The steps involve integrating the custom paginator component into your table component and ensuring the table's data source updates correctly based on the paginator's state. Here's how you can do it:
+
+### Step-by-Step Guide
+
+1. **Create a Custom Paginator Component:**
+   Follow the previous steps to create and set up the custom paginator component.
+
+2. **Integrate the Custom Paginator with the Mat-Table:**
+   Modify your table component to use the custom paginator.
+
+### Example
+
+#### 1. Custom Paginator Component
+
+Assuming you have already created the custom paginator component as described before.
+
+#### 2. Table Component
+
+Modify your table component to integrate the custom paginator.
+
+##### HTML Template
+
+Use the custom paginator in your table component template.
+
+```html
+<!-- your-table-component.component.html -->
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <!-- Define columns here -->
+  <ng-container matColumnDef="position">
+    <th mat-header-cell *matHeaderCellDef> No. </th>
+    <td mat-cell *matCellDef="let element"> {{element.position}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef> Name </th>
+    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+  </ng-container>
+
+  <!-- Add other columns as needed -->
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+<app-custom-paginator [length]="length"
+                      [pageSize]="pageSize"
+                      [pageSizeOptions]="pageSizeOptions"
+                      (page)="handlePageEvent($event)">
+</app-custom-paginator>
+```
+
+##### TypeScript Logic
+
+Set up the data source and handle paginator events to update the table's data.
+
+```typescript
+// your-table-component.component.ts
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
+import { PageEvent } from '@angular/material/paginator';
+import { ELEMENT_DATA, PeriodicElement } from './element-data'; // Import your data
+
+@Component({
+  selector: 'app-your-table-component',
+  templateUrl: './your-table-component.component.html',
+  styleUrls: ['./your-table-component.component.css']
+})
+export class YourTableComponent implements OnInit {
+  displayedColumns: string[] = ['position', 'name']; // Add other columns as needed
+  dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
+  
+  length = ELEMENT_DATA.length;
+  pageSize = 10;
+  pageSizeOptions: number[] = [5, 10, 20];
+
+  @ViewChild(CustomPaginatorComponent) paginator: CustomPaginatorComponent;
+
+  ngOnInit(): void {
+    this.updateDataSource();
+  }
+
+  handlePageEvent(event: PageEvent): void {
+    this.pageSize = event.pageSize;
+    this.paginator.pageIndex = event.pageIndex;
+    this.updateDataSource();
+  }
+
+  updateDataSource(): void {
+    const startIndex = this.paginator.pageIndex * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.dataSource.data = ELEMENT_DATA.slice(startIndex, endIndex);
+  }
+}
+```
+
+### Integrate Custom Paginator Module
+
+Ensure your custom paginator component and the necessary Angular Material modules are imported in your module.
+
+```typescript
+// app.module.ts
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
+import { AppComponent } from './app.component';
+import { CustomPaginatorComponent } from './custom-paginator/custom-paginator.component';
+import { YourTableComponent } from './your-table/your-table.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    CustomPaginatorComponent,
+    YourTableComponent
+  ],
+  imports: [
+    FormsModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+### Summary
+
+By following these steps, you can integrate a custom paginator with an input field between the next and previous buttons into a `mat-table`. This allows you to navigate to specific pages using the input field and handle pagination events to update the table's data source accordingly.
