@@ -1,0 +1,201 @@
+To insert an input field between the next and previous buttons in the `mat-paginator`, you will need to create a custom paginator component. Angular Material doesn't provide a straightforward way to insert elements between the paginator controls directly, so you'll need to recreate the paginator layout with your custom additions.
+
+### Step-by-Step Guide
+
+1. **Create a Custom Paginator Component:**
+   Extend the default paginator component to include an input field.
+
+2. **Modify the Template:**
+   Customize the paginator template to insert the input field.
+
+### 1. Create a Custom Paginator Component
+
+Create a new component for the custom paginator:
+
+```bash
+ng generate component custom-paginator
+```
+
+### 2. Modify the Custom Paginator Component
+
+#### HTML Template
+
+Customize the paginator template to include an input field between the next and previous buttons.
+
+```html
+<!-- custom-paginator.component.html -->
+<div class="mat-paginator">
+  <div class="mat-paginator-outer-container">
+    <div class="mat-paginator-container">
+      <div class="mat-paginator-page-size">
+        <mat-form-field>
+          <mat-label>Items per page:</mat-label>
+          <mat-select [value]="pageSize" (selectionChange)="changePageSize($event.value)">
+            <mat-option *ngFor="let pageSizeOption of pageSizeOptions" [value]="pageSizeOption">
+              {{ pageSizeOption }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="mat-paginator-range-actions">
+        <button mat-icon-button (click)="firstPage()" [disabled]="pageIndex == 0">
+          <mat-icon>first_page</mat-icon>
+        </button>
+        <button mat-icon-button (click)="previousPage()" [disabled]="pageIndex == 0">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <input type="number" [(ngModel)]="pageIndexInput" (change)="changePageIndex()" />
+        <button mat-icon-button (click)="nextPage()" [disabled]="pageIndex >= getNumberOfPages() - 1">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button mat-icon-button (click)="lastPage()" [disabled]="pageIndex >= getNumberOfPages() - 1">
+          <mat-icon>last_page</mat-icon>
+        </button>
+      </div>
+      <div class="mat-paginator-range-label">
+        {{ getRangeLabel() }}
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+#### TypeScript Logic
+
+Implement the logic for the custom paginator component.
+
+```typescript
+// custom-paginator.component.ts
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
+
+@Component({
+  selector: 'app-custom-paginator',
+  templateUrl: './custom-paginator.component.html',
+  styleUrls: ['./custom-paginator.component.css']
+})
+export class CustomPaginatorComponent implements OnChanges {
+  @Input() length: number;
+  @Input() pageSize: number;
+  @Input() pageSizeOptions: number[] = [5, 10, 20];
+  @Output() page: EventEmitter<PageEvent> = new EventEmitter<PageEvent>();
+
+  pageIndex = 0;
+  pageIndexInput = 0;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.pageSize) {
+      this.pageIndexInput = this.pageIndex;
+    }
+  }
+
+  getNumberOfPages(): number {
+    return Math.ceil(this.length / this.pageSize);
+  }
+
+  changePageSize(size: number): void {
+    this.pageSize = size;
+    this.pageIndex = 0;
+    this.pageIndexInput = 0;
+    this.emitPageEvent();
+  }
+
+  firstPage(): void {
+    this.pageIndex = 0;
+    this.pageIndexInput = 0;
+    this.emitPageEvent();
+  }
+
+  previousPage(): void {
+    if (this.pageIndex > 0) {
+      this.pageIndex--;
+      this.pageIndexInput = this.pageIndex;
+      this.emitPageEvent();
+    }
+  }
+
+  nextPage(): void {
+    if (this.pageIndex < this.getNumberOfPages() - 1) {
+      this.pageIndex++;
+      this.pageIndexInput = this.pageIndex;
+      this.emitPageEvent();
+    }
+  }
+
+  lastPage(): void {
+    this.pageIndex = this.getNumberOfPages() - 1;
+    this.pageIndexInput = this.pageIndex;
+    this.emitPageEvent();
+  }
+
+  changePageIndex(): void {
+    if (this.pageIndexInput >= 0 && this.pageIndexInput < this.getNumberOfPages()) {
+      this.pageIndex = this.pageIndexInput;
+      this.emitPageEvent();
+    }
+  }
+
+  emitPageEvent(): void {
+    this.page.emit({ pageIndex: this.pageIndex, pageSize: this.pageSize, length: this.length });
+  }
+
+  getRangeLabel(): string {
+    const startIndex = this.pageIndex * this.pageSize + 1;
+    const endIndex = Math.min((this.pageIndex + 1) * this.pageSize, this.length);
+    return `${startIndex} - ${endIndex} of ${this.length}`;
+  }
+}
+```
+
+### 3. Use the Custom Paginator Component
+
+Replace the default `mat-paginator` in your component template with the custom paginator.
+
+```html
+<!-- your-component.component.html -->
+<app-custom-paginator [length]="length"
+                      [pageSize]="pageSize"
+                      [pageSizeOptions]="pageSizeOptions"
+                      (page)="handlePageEvent($event)">
+</app-custom-paginator>
+```
+
+### 4. Integrate the Custom Paginator Component
+
+In your module, declare and import the custom paginator component.
+
+```typescript
+// app.module.ts
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
+import { AppComponent } from './app.component';
+import { CustomPaginatorComponent } from './custom-paginator/custom-paginator.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    CustomPaginatorComponent
+  ],
+  imports: [
+    FormsModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+### Summary
+
+This approach involves creating a custom paginator component to add an input field between the next and previous buttons. The custom component replicates the paginator's functionality and adds an input field to navigate to a specific page index. You can further style and refine this component to match your application's design requirements.
